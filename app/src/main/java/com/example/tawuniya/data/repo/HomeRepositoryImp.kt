@@ -1,7 +1,10 @@
 package com.example.tawuniya.data.repo
 
+import com.example.tawuniya.data.source.local.TawuniyaDao
+import com.example.tawuniya.data.source.local.entity.toDto
+import com.example.tawuniya.data.source.local.entity.toEntity
 import com.example.tawuniya.data.source.remote.TawuniyaApiService
-import com.example.tawuniya.data.source.remote.model.UserDto
+import com.example.tawuniya.data.source.remote.dto.UserDto
 import com.example.tawuniya.data.util.InvalidResponse
 import com.example.tawuniya.data.util.NetworkError
 import com.example.tawuniya.data.util.NotFound
@@ -14,7 +17,8 @@ import javax.inject.Inject
  */
 
 class HomeRepositoryImp @Inject constructor(
-    val remoteDataSource: TawuniyaApiService
+    val remoteDataSource: TawuniyaApiService,
+    val localDataSource: TawuniyaDao
 ) : HomeRepository {
 
     override suspend fun getAllUsers(): List<UserDto> {
@@ -22,7 +26,11 @@ class HomeRepositoryImp @Inject constructor(
     }
 
     override suspend fun addUserToFavorites(user: UserDto) {
+        localDataSource.addUserToFavourites(user.toEntity())
+    }
 
+    override suspend fun getAllFavouritesUsers(): List<UserDto> {
+        return localDataSource.getAllFavouritesUsers().toDto()
     }
 
 

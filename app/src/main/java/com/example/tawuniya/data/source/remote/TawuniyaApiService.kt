@@ -1,6 +1,6 @@
 package com.example.tawuniya.data.source.remote
 
-import com.example.tawuniya.data.source.remote.model.UserDto
+import com.example.tawuniya.data.source.remote.dto.UserDto
 import retrofit2.Response
 import retrofit2.http.GET
 

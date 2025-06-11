@@ -47,10 +47,9 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 
     HomeContent(
         state = state,
-        onRetry = { viewModel::getAllUsers },
-        onFavoriteClick = { viewModel::toggleFavorite }
+        onRetry = viewModel::getAllUsers,
+        onFavoriteClick = viewModel::addUserToFavorites
     )
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +57,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 fun HomeContent(
     state: HomeUiState,
     onRetry: () -> Unit,
-    onFavoriteClick: () -> Unit,
+    onFavoriteClick: (UserUiState) -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -126,7 +125,7 @@ private fun FailedStateUi(onRetry: () -> Unit) {
 @Composable
 private fun SuccessStateUi(
     state: HomeUiState,
-    onFavoriteClick: () -> Unit
+    onFavoriteClick: (UserUiState) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.background(Color(0xFFF2F2F2)),
@@ -136,22 +135,16 @@ private fun SuccessStateUi(
     ) {
         itemsIndexed(items = state.users) { _, user ->
             UserItem(
-                user.email,
-                user.name,
-                user.phone,
-                user.isFavorite,
-                onFavoriteClick = { onFavoriteClick() })
+                user = user,
+                onFavoriteClick = { onFavoriteClick(user) }
+            )
         }
     }
 }
 
-
 @Composable
 private fun UserItem(
-    email: String,
-    name: String,
-    phone: String,
-    isFavorite: Boolean,
+    user: UserUiState,
     modifier: Modifier = Modifier,
     onFavoriteClick: () -> Unit = {}
 ) {
@@ -170,10 +163,11 @@ private fun UserItem(
                 .padding(16.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = name,
+                    text = user.name,
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
@@ -182,17 +176,18 @@ private fun UserItem(
                     Icon(
                         imageVector = Icons.Outlined.Favorite,
                         contentDescription = "Favorite",
-                        tint = if (isFavorite) Color.Red else Color.Gray
+                        tint = if (user.isFavorite) Color.Red else Color.Gray
                     )
                 }
             }
             Text(
-                text = email,
+                text = user.email,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = phone, style = MaterialTheme.typography.bodyMedium
+                text = user.phone,
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

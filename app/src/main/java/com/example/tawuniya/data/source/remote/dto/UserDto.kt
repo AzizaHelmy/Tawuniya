@@ -1,4 +1,4 @@
-package com.example.tawuniya.data.source.remote.model
+package com.example.tawuniya.data.source.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

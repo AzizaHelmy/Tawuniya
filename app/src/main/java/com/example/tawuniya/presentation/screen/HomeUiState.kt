@@ -13,5 +13,5 @@ data class UserUiState(
     val name: String,
     val email: String,
     val phone: String,
-    val isFavorite: Boolean = true
+    val isFavorite: Boolean = false
 )

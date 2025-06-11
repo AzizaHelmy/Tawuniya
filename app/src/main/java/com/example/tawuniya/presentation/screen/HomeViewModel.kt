@@ -3,7 +3,7 @@ package com.example.tawuniya.presentation.screen
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tawuniya.data.repo.HomeRepository
-import com.example.tawuniya.data.source.remote.model.UserDto
+import com.example.tawuniya.data.source.remote.dto.UserDto
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -39,15 +39,32 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
             },
             onError = { _state.update { it.copy(isError = true, isLoading = false) } })
     }
-    fun toggleFavorite(user: UserUiState) {
-        val updatedUsers = _state.value.users.map {
-            if (it == user) {
-                it.copy(isFavorite = !it.isFavorite)
-            } else {
-                it
-            }
-        }
+
+    fun addUserToFavorites(user: UserUiState) {
+        tryToExecute(
+            { repository.addUserToFavorites(user.toDto()) },
+            onSuccess = {
+                _state.update { currentState ->
+                    currentState.copy(
+                        users = currentState.users.map { currentUser ->
+                            if (currentUser == user) {
+                                currentUser.copy(isFavorite = !currentUser.isFavorite)
+                            } else {
+                                currentUser
+                            }
+                        }
+                    )
+                }
+            },
+            onError = { _state.update { it.copy(isError = true) } })
     }
+
+    fun UserUiState.toDto() = UserDto(
+        id = 0,
+        name = name,
+        email = email,
+        phone = phone
+    )
 
     fun List<UserDto>.toUiState(): List<UserUiState> {
         return map { userDto ->
