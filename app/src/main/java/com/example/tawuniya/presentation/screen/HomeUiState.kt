@@ -9,4 +9,9 @@ data class HomeUiState(
     val users: List<UserUiState> = emptyList()
 )
 
-data class UserUiState(val name: String, val email: String, val phone: String)
+data class UserUiState(
+    val name: String,
+    val email: String,
+    val phone: String,
+    val isFavorite: Boolean = true
+)

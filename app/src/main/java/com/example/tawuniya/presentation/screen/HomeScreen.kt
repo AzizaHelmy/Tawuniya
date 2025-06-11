@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,11 +14,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -40,29 +45,34 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    HomeContent(state = state, onRetry = { viewModel.getAllUsers() })
+    HomeContent(
+        state = state,
+        onRetry = { viewModel::getAllUsers },
+        onFavoriteClick = { viewModel::toggleFavorite }
+    )
 
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeContent(state: HomeUiState, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun HomeContent(
+    state: HomeUiState,
+    onRetry: () -> Unit,
+    onFavoriteClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
 
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black,
-                    titleContentColor = Color.White
-                ),
-                title = {
+                    containerColor = Color.Black, titleContentColor = Color.White
+                ), title = {
                     Text(
-                        " Random Users",
+                        "Tawuniya Users",
                     )
-                }
-            )
-        }
-    ) { paddingValues ->
+                })
+        }) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -76,59 +86,74 @@ fun HomeContent(state: HomeUiState, onRetry: () -> Unit, modifier: Modifier = Mo
                 }
 
                 state.isError == true -> {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "Your request can't be completed, plz try again",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = { onRetry() }) {
-                            Text("Retry")
-                        }
-                    }
+                    FailedStateUi(onRetry)
                 }
 
                 state.users.isEmpty() -> {
                     Text(
-                        text = "No users found",
-                        modifier = Modifier.align(Alignment.Center)
+                        text = "No users found", modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
                 else -> {
-                    LazyColumn(
-                        modifier = Modifier.background(Color(0xFFF2F2F2)),
-                        contentPadding = PaddingValues(
-                            horizontal = 16.dp,
-                            vertical = 4.dp
-                        )
-                    ) {
-                        itemsIndexed(items = state.users) { _, user ->
-                            UserItem(
-                                user.email,
-                                user.name,
-                                user.phone
-                            )
-                        }
-                    }
+                    SuccessStateUi(state, onFavoriteClick)
                 }
             }
         }
     }
 }
 
+@Composable
+private fun FailedStateUi(onRetry: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "Your request can't be completed, plz try again",
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { onRetry() }) {
+            Text("Retry")
+        }
+    }
+}
 
 @Composable
-fun UserItem(
+private fun SuccessStateUi(
+    state: HomeUiState,
+    onFavoriteClick: () -> Unit
+) {
+    LazyColumn(
+        modifier = Modifier.background(Color(0xFFF2F2F2)),
+        contentPadding = PaddingValues(
+            horizontal = 16.dp, vertical = 4.dp
+        )
+    ) {
+        itemsIndexed(items = state.users) { _, user ->
+            UserItem(
+                user.email,
+                user.name,
+                user.phone,
+                user.isFavorite,
+                onFavoriteClick = { onFavoriteClick() })
+        }
+    }
+}
+
+
+@Composable
+private fun UserItem(
     email: String,
     name: String,
     phone: String,
+    isFavorite: Boolean,
+    modifier: Modifier = Modifier,
+    onFavoriteClick: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(15.dp),
@@ -144,19 +169,30 @@ fun UserItem(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                IconButton(onClick = { onFavoriteClick() }) {
+                    Icon(
+                        imageVector = Icons.Outlined.Favorite,
+                        contentDescription = "Favorite",
+                        tint = if (isFavorite) Color.Red else Color.Gray
+                    )
+                }
+            }
             Text(
                 text = email,
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 4.dp)
             )
             Text(
-                text = phone,
-                style = MaterialTheme.typography.bodyMedium
+                text = phone, style = MaterialTheme.typography.bodyMedium
             )
         }
     }

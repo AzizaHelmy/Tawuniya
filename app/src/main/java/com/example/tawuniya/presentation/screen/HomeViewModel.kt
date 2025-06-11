@@ -39,6 +39,15 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
             },
             onError = { _state.update { it.copy(isError = true, isLoading = false) } })
     }
+    fun toggleFavorite(user: UserUiState) {
+        val updatedUsers = _state.value.users.map {
+            if (it == user) {
+                it.copy(isFavorite = !it.isFavorite)
+            } else {
+                it
+            }
+        }
+    }
 
     fun List<UserDto>.toUiState(): List<UserUiState> {
         return map { userDto ->
