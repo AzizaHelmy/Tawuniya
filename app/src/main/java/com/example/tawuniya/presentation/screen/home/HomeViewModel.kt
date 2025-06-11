@@ -42,14 +42,15 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
     }
 
     fun addUserToFavorites(user: UserUiState) {
+        val updatedUser = user.copy(isFavorite = true)
         tryToExecute(
-            { repository.addUserToFavorites(user.toDto()) },
+            { repository.addUserToFavorites(updatedUser.toDto()) },
             onSuccess = {
                 _state.update { currentState ->
                     currentState.copy(
                         users = currentState.users.map { currentUser ->
                             if (currentUser == user) {
-                                currentUser.copy(isFavorite = !currentUser.isFavorite)
+                                updatedUser
                             } else {
                                 currentUser
                             }
@@ -60,21 +61,26 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
                 }
             },
             onError = {
-                _state.update {
-                    it.copy(
-                        isError = true,
-                    )
-                }
-            })
+                _state.update { it.copy(isError = true) }
+            }
+        )
     }
 
+
     fun deleteUserFromFavorites(user: UserUiState) {
+        val updatedUser = user.copy(isFavorite = false)
         tryToExecute(
-            { repository.deleteUserFromFavorites(user.toDto()) },
+            { repository.deleteUserFromFavorites(updatedUser.toDto()) },
             onSuccess = {
                 _state.update { currentState ->
                     currentState.copy(
-                        users = currentState.users.filterNot { it.email == user.email },
+                        users = currentState.users.map { currentUser ->
+                            if (currentUser.email == updatedUser.email) {
+                                updatedUser
+                            } else {
+                                currentUser
+                            }
+                        },
                         userToDelete = null,
                         showSnackbar = true,
                         snackbarMessageType = SnackbarMessageType.RemovedFromFavorites
@@ -101,6 +107,7 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
         }
     }
 
+    //Todo: Move the Mappers to a separate class
     fun UserUiState.toDto() = UserDto(
         name = name,
         email = email,
