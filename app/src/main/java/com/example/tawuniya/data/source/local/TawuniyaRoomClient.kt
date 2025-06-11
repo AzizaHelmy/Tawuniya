@@ -17,7 +17,6 @@ internal object TawuniyaRoomClient {
             TawuniyaDataBase::class.java,
             DATABASE_NAME
         ).fallbackToDestructiveMigration(true)
-             //.addMigrations(MIGRATION_1_2) // For production migrations
             .build()
     }
 }

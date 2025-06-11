@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Tawuniya</string>
-    <string name="remove">Remove</string>
-    <string name="cancel">Cancel</string>
-    <string name="remove_from_favorites">Remove from Favorites</string>
-    <string name="are_you_sure_you_want_to_remove_from_favorites">Are you sure you want to remove %1$s from favorites?</string>
-    <string name="error_message">Your request can\'t be completed, plz try again</string>
-    <string name="user_removed_from_favorites">User removed from favorites</string>
-    <string name="user_added_to_favorites">User added to favorites</string>
+    <string name="app_name">مستخدمي التعاونية  </string>
+    <string name="remove">مسح</string>
+    <string name="cancel">الغاء</string>
+    <string name="remove_from_favorites">مسح من المضله</string>
+    <string name="are_you_sure_you_want_to_remove_from_favorites">هل أنت متأكد أنك تريد مسح من المفضله %1$s?</string>
+    <string name="error_message">لا يمكن تنفيذ طلبك الان، حاول مره اخري</string>
+    <string name="user_removed_from_favorites">تم المسح من المفضلة </string>
+    <string name="user_added_to_favorites">تم اضافه المستخدم الي المفضله</string>
+
 </resources>
