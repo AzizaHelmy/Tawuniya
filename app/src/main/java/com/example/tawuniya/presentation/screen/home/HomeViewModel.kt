@@ -1,4 +1,4 @@
-package com.example.tawuniya.presentation.screen
+package com.example.tawuniya.presentation.screen.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,29 +42,49 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
     }
 
     fun addUserToFavorites(user: UserUiState) {
-        val updatedUser = user.copy(isFavorite = !user.isFavorite)
         tryToExecute(
-            { repository.addUserToFavorites(updatedUser.toDto()) },
+            { repository.addUserToFavorites(user.toDto()) },
             onSuccess = {
-                _state.update {
-                    it.copy(
-                        users = it.users.map { currentUser ->
+                _state.update { currentState ->
+                    currentState.copy(
+                        users = currentState.users.map { currentUser ->
                             if (currentUser == user) {
-                                updatedUser
+                                currentUser.copy(isFavorite = !currentUser.isFavorite)
                             } else {
                                 currentUser
                             }
-                        })
+                        },
+                        showSnackbar = true
+                    )
                 }
-            }, onError = { _state.update { it.copy(isError = true) } })
+            },
+            onError = {
+                _state.update { 
+                    it.copy(
+                        isError = true,
+                    )
+                }
+            })
     }
-//TODO: Move the Mappers to a separate class
+
+    fun showDeleteDialog(user: UserUiState) {
+        _state.update { it.copy(showDeleteDialog = true, userToDelete = user) }
+    }
+
+    fun dismissDeleteDialog() {
+        _state.update { it.copy(showDeleteDialog = false, userToDelete = null) }
+    }
+
+    fun dismissSnackbar() {
+        _state.update { it.copy(showSnackbar = false) }
+    }
+
     fun UserUiState.toDto() = UserDto(
-        name = name,
-        email = email,
-        phone = phone,
-        isFavorite = isFavorite
-    )
+    name = name,
+    email = email,
+    phone = phone,
+    isFavorite = isFavorite
+)
 
     fun List<UserDto>.toUiState(): List<UserUiState> {
         return map { userDto ->

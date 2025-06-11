@@ -1,4 +1,4 @@
-package com.example.tawuniya.presentation.screen
+package com.example.tawuniya.presentation.screen.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,17 +25,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.tawuniya.R
+import com.example.tawuniya.presentation.screen.composable.ConfirmationDialog
 
 /**
  * Created by Aziza Helmy on 11/06/2025.
@@ -48,7 +56,21 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     HomeContent(
         state = state,
         onRetry = viewModel::getAllUsers,
-        onFavoriteClick = viewModel::addUserToFavorites
+        onFavoriteClick = { user ->
+            if (user.isFavorite) {
+                viewModel.showDeleteDialog(user)
+            } else {
+                viewModel.addUserToFavorites(user)
+            }
+        },
+        onDismissSnackbar = { viewModel.dismissSnackbar() },
+        onConfirmDelete = {
+            state.userToDelete?.let { user ->
+                viewModel.addUserToFavorites(user)
+            }
+            viewModel.dismissDeleteDialog()
+        },
+        onDismissDeleteDialog = { viewModel.dismissDeleteDialog() }
     )
 }
 
@@ -58,20 +80,57 @@ fun HomeContent(
     state: HomeUiState,
     onRetry: () -> Unit,
     onFavoriteClick: (UserUiState) -> Unit,
+    onDismissSnackbar: () -> Unit,
+    onConfirmDelete: () -> Unit,
+    onDismissDeleteDialog: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    val message = if (state.userToDelete?.isFavorite == true) {
+        stringResource(R.string.user_removed_from_favorites)
+    } else {
+        stringResource(R.string.user_added_to_favorites)
+    }
+
+    LaunchedEffect(state.showSnackbar) {
+        if (state.showSnackbar) {
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short
+            )
+            onDismissSnackbar()
+        }
+    }
+
+    if (state.showDeleteDialog) {
+        ConfirmationDialog(
+            title = stringResource(R.string.remove_from_favorites),
+            message = stringResource(
+                R.string.are_you_sure_you_want_to_remove_from_favorites,
+                state.userToDelete?.name ?: ""
+            ),
+            confirmButtonText = stringResource(R.string.remove),
+            dismissButtonText = stringResource(R.string.cancel),
+            onDismissClicked = onDismissDeleteDialog,
+            onConfirmClicked = onConfirmDelete
+        )
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black, titleContentColor = Color.White
-                ), title = {
-                    Text(
-                        "Tawuniya Users",
-                    )
-                })
-        }) { paddingValues ->
+                    containerColor = Color.Black,
+                    titleContentColor = Color.White
+                ),
+                title = {
+                    Text("Tawuniya Users")
+                }
+            )
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -84,13 +143,14 @@ fun HomeContent(
                     )
                 }
 
-                state.isError == true -> {
-                    FailedStateUi(onRetry)
+                state.isError -> {
+                    FailedStateUi(state.errorMessage, onRetry)
                 }
 
                 state.users.isEmpty() -> {
                     Text(
-                        text = "No users found", modifier = Modifier.align(Alignment.Center)
+                        text = "No users found",
+                        modifier = Modifier.align(Alignment.Center)
                     )
                 }
 
@@ -102,8 +162,9 @@ fun HomeContent(
     }
 }
 
+
 @Composable
-private fun FailedStateUi(onRetry: () -> Unit) {
+private fun FailedStateUi(errorMessage: String?, onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,7 +173,7 @@ private fun FailedStateUi(onRetry: () -> Unit) {
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Your request can't be completed, plz try again",
+            text = errorMessage ?: stringResource(R.string.error_message),
             style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -130,7 +191,8 @@ private fun SuccessStateUi(
     LazyColumn(
         modifier = Modifier.background(Color(0xFFF2F2F2)),
         contentPadding = PaddingValues(
-            horizontal = 16.dp, vertical = 4.dp
+            horizontal = 16.dp,
+            vertical = 4.dp
         )
     ) {
         itemsIndexed(items = state.users) { _, user ->
@@ -172,7 +234,7 @@ private fun UserItem(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
 
-                IconButton(onClick = { onFavoriteClick() }) {
+                IconButton(onClick = onFavoriteClick) {
                     Icon(
                         imageVector = Icons.Outlined.Favorite,
                         contentDescription = "Favorite",

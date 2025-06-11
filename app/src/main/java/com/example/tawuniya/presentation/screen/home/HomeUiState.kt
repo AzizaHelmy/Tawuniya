@@ -1,4 +1,4 @@
-package com.example.tawuniya.presentation.screen
+package com.example.tawuniya.presentation.screen.home
 
 /**
  * Created by Aziza Helmy on 11/06/2025.
@@ -7,7 +7,11 @@ package com.example.tawuniya.presentation.screen
 data class HomeUiState(
     val isLoading: Boolean = false,
     val isError: Boolean = false,
-    val users: List<UserUiState> = emptyList()
+    val errorMessage: String = "",
+    val users: List<UserUiState> = emptyList(),
+    val showSnackbar: Boolean = false,
+    val showDeleteDialog: Boolean = false,
+    val userToDelete: UserUiState? = null
 )
 
 data class UserUiState(
