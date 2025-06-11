@@ -1,4 +1,4 @@
-package com.example.tawuniya.ui.theme
+package com.example.tawuniya.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
