@@ -54,17 +54,37 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
                                 currentUser
                             }
                         },
-                        showSnackbar = true
+                        showSnackbar = true,
+                        snackbarMessageType = SnackbarMessageType.AddedToFavorites
                     )
                 }
             },
             onError = {
-                _state.update { 
+                _state.update {
                     it.copy(
                         isError = true,
                     )
                 }
             })
+    }
+
+    fun deleteUserFromFavorites(user: UserUiState) {
+        tryToExecute(
+            { repository.deleteUserFromFavorites(user.toDto()) },
+            onSuccess = {
+                _state.update { currentState ->
+                    currentState.copy(
+                        users = currentState.users.filterNot { it.email == user.email },
+                        userToDelete = null,
+                        showSnackbar = true,
+                        snackbarMessageType = SnackbarMessageType.RemovedFromFavorites
+                    )
+                }
+            },
+            onError = {
+                _state.update { it.copy(isError = true) }
+            }
+        )
     }
 
     fun showDeleteDialog(user: UserUiState) {
@@ -76,15 +96,17 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
     }
 
     fun dismissSnackbar() {
-        _state.update { it.copy(showSnackbar = false) }
+        _state.update {
+            it.copy(showSnackbar = false, snackbarMessageType = null)
+        }
     }
 
     fun UserUiState.toDto() = UserDto(
-    name = name,
-    email = email,
-    phone = phone,
-    isFavorite = isFavorite
-)
+        name = name,
+        email = email,
+        phone = phone,
+        isFavorite = isFavorite
+    )
 
     fun List<UserDto>.toUiState(): List<UserUiState> {
         return map { userDto ->

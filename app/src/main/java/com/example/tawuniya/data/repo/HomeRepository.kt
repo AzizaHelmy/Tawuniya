@@ -12,5 +12,9 @@ interface HomeRepository {
 
     suspend fun addUserToFavorites(user: UserDto)
 
+    suspend fun deleteUserFromFavorites(user: UserDto)
+
     suspend fun getAllFavouritesUsers(): List<UserDto>
+
+
 }

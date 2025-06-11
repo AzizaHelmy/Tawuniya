@@ -59,14 +59,15 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
         onFavoriteClick = { user ->
             if (user.isFavorite) {
                 viewModel.showDeleteDialog(user)
-            } else {
+            }
+            else {
                 viewModel.addUserToFavorites(user)
             }
         },
         onDismissSnackbar = { viewModel.dismissSnackbar() },
         onConfirmDelete = {
             state.userToDelete?.let { user ->
-                viewModel.addUserToFavorites(user)
+                viewModel.deleteUserFromFavorites(user)
             }
             viewModel.dismissDeleteDialog()
         },
@@ -87,10 +88,10 @@ fun HomeContent(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
 
-    val message = if (state.userToDelete?.isFavorite == true) {
-        stringResource(R.string.user_removed_from_favorites)
-    } else {
-        stringResource(R.string.user_added_to_favorites)
+    val message = when (state.snackbarMessageType) {
+        SnackbarMessageType.RemovedFromFavorites -> stringResource(R.string.user_removed_from_favorites)
+        SnackbarMessageType.AddedToFavorites -> stringResource(R.string.user_added_to_favorites)
+        null -> ""
     }
 
     LaunchedEffect(state.showSnackbar) {

@@ -5,18 +5,24 @@ package com.example.tawuniya.presentation.screen.home
  */
 
 data class HomeUiState(
+    val users: List<UserUiState> = emptyList(),
     val isLoading: Boolean = false,
     val isError: Boolean = false,
     val errorMessage: String = "",
-    val users: List<UserUiState> = emptyList(),
     val showSnackbar: Boolean = false,
     val showDeleteDialog: Boolean = false,
-    val userToDelete: UserUiState? = null
+    val userToDelete: UserUiState? = null,
+    val snackbarMessageType: SnackbarMessageType? = null
 )
 
 data class UserUiState(
-    val name: String,
-    val email: String,
-    val phone: String,
+    val name: String = "",
+    val email: String = "",
+    val phone: String = "",
     val isFavorite: Boolean = false
 )
+
+enum class SnackbarMessageType {
+    AddedToFavorites,
+    RemovedFromFavorites
+}

@@ -34,6 +34,10 @@ class HomeRepositoryImp @Inject constructor(
         localDataSource.addUserToFavourites(user.toEntity())
     }
 
+    override suspend fun deleteUserFromFavorites(user: UserDto) {
+        localDataSource.deleteUserFromFavorites(user.toEntity())
+    }
+
     override suspend fun getAllFavouritesUsers(): List<UserDto> {
         return localDataSource.getAllFavouritesUsers().toDto()
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Tawuniya</string>
     <string name="remove">Remove</string>
     <string name="cancel">Cancel</string>
     <string name="remove_from_favorites">Remove from Favorites</string>
