@@ -8,7 +8,7 @@ import com.example.tawuniya.data.source.local.entity.UserEntity
  * Created by Aziza Helmy on 11/06/2025.
  */
 
-@Database(entities = [UserEntity::class], version = 1)
+@Database(entities = [UserEntity::class], version = 4)
 abstract class TawuniyaDataBase : RoomDatabase() {
     abstract fun getTawuniyaDao(): TawuniyaDao
 }

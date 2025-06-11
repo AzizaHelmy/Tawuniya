@@ -22,7 +22,12 @@ class HomeRepositoryImp @Inject constructor(
 ) : HomeRepository {
 
     override suspend fun getAllUsers(): List<UserDto> {
-        return wrap { remoteDataSource.getAllUsers() }
+        val remoteUsers = wrap { remoteDataSource.getAllUsers() }
+        val favoriteUsers = localDataSource.getAllFavouritesUsers()
+
+        return remoteUsers.map { userDto ->
+            userDto.copy(isFavorite = favoriteUsers.any { it.id == userDto.id })
+        }
     }
 
     override suspend fun addUserToFavorites(user: UserDto) {

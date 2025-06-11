@@ -20,8 +20,7 @@ data class UserDto(
     val phone: String? = null,
     @SerialName("username")
     val username: String? = null,
-    @SerialName("website")
-    val website: String? = null
+    val isFavorite: Boolean = false
 ) {
     @Serializable
     data class Address(

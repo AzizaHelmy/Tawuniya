@@ -14,14 +14,16 @@ data class UserEntity(
     val id: Int,
     val name: String,
     val email: String,
-    val phone: String
+    val phone: String,
+    val isFavorite: Boolean
 )
 
 fun UserDto.toEntity() = UserEntity(
     id = id ?: 0,
     name = name.orEmpty(),
     email = email.orEmpty(),
-    phone = phone.orEmpty()
+    phone = phone.orEmpty(),
+    isFavorite = isFavorite
 )
 
 fun List<UserEntity>.toDto() = map { userEntity ->
@@ -29,6 +31,7 @@ fun List<UserEntity>.toDto() = map { userEntity ->
         id = userEntity.id,
         name = userEntity.name,
         email = userEntity.email,
-        phone = userEntity.phone
+        phone = userEntity.phone,
+        isFavorite = userEntity.isFavorite
     )
 }
