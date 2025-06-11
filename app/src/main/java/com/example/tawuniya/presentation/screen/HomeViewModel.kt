@@ -27,35 +27,38 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
     }
 
     fun getAllUsers() {
-        _state.update { it.copy(isLoading = true, isError = false) }
-        tryToExecute({ repository.getAllUsers() }, onSuccess = { users ->
-            _state.update {
-                it.copy(users = users.toUiState(), isLoading = false)
-            }
-        }, onError = {
-            _state.update {
-                it.copy(isLoading = false, isError = true)
-            }
-        })
+        _state.update { it.copy(isLoading = true) }
+        tryToExecute(
+            { repository.getAllUsers() },
+            onSuccess = { users ->
+                _state.update {
+                    it.copy(users = users.toUiState(), isLoading = false)
+                }
+            }, onError = {
+                _state.update {
+                    it.copy(isLoading = false, isError = true)
+                }
+            })
     }
 
     fun addUserToFavorites(user: UserUiState) {
         val updatedUser = user.copy(isFavorite = !user.isFavorite)
-        tryToExecute({ repository.addUserToFavorites(updatedUser.toDto()) },
+        tryToExecute(
+            { repository.addUserToFavorites(updatedUser.toDto()) },
             onSuccess = {
-            _state.update { currentState ->
-                currentState.copy(
-                    users = currentState.users.map { currentUser ->
-                        if (currentUser == user) {
-                            updatedUser
-                        } else {
-                            currentUser
-                        }
-                    })
-            }
-        }, onError = { _state.update { it.copy(isError = true) } })
+                _state.update {
+                    it.copy(
+                        users = it.users.map { currentUser ->
+                            if (currentUser == user) {
+                                updatedUser
+                            } else {
+                                currentUser
+                            }
+                        })
+                }
+            }, onError = { _state.update { it.copy(isError = true) } })
     }
-
+//TODO: Move the Mappers to a separate class
     fun UserUiState.toDto() = UserDto(
         name = name,
         email = email,
@@ -73,6 +76,7 @@ class HomeViewModel @Inject constructor(val repository: HomeRepository) : ViewMo
             )
         }
     }
+
 
     private fun <T> tryToExecute(
         function: suspend () -> T,

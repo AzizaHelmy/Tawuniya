@@ -10,16 +10,16 @@ import com.example.tawuniya.data.source.remote.dto.UserDto
 
 @Entity(tableName = "favourites_users")
 data class UserEntity(
-    @PrimaryKey(autoGenerate = true)
-    val id: Int,
     val name: String,
+    @PrimaryKey
     val email: String,
     val phone: String,
     val isFavorite: Boolean
 )
 
+
+//Todo: Move the Mappers to a separate class
 fun UserDto.toEntity() = UserEntity(
-    id = id ?: 0,
     name = name.orEmpty(),
     email = email.orEmpty(),
     phone = phone.orEmpty(),
@@ -28,7 +28,6 @@ fun UserDto.toEntity() = UserEntity(
 
 fun List<UserEntity>.toDto() = map { userEntity ->
     UserDto(
-        id = userEntity.id,
         name = userEntity.name,
         email = userEntity.email,
         phone = userEntity.phone,

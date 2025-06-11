@@ -26,7 +26,7 @@ class HomeRepositoryImp @Inject constructor(
         val favoriteUsers = localDataSource.getAllFavouritesUsers()
 
         return remoteUsers.map { userDto ->
-            userDto.copy(isFavorite = favoriteUsers.any { it.id == userDto.id })
+            userDto.copy(isFavorite = favoriteUsers.any { it.email == userDto.email })
         }
     }
 
